@@ -1,6 +1,7 @@
-from codecs import getdecoder
+import sqlite3
 import tkinter as tk
 from tkinter import ACTIVE, DISABLED, END, LEFT, messagebox
+from datetime import date
 
 class windows(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -392,14 +393,105 @@ class Log(tk.Frame):
         storeButton = tk.Button(self, text="Store lifts", command=lambda:storeData())
         storeButton.place(x=115,y=148)
 
-        #deletes data after storing
+        #sends data to db and deletes data after storing
         def storeData():
+            squatDBConnect()
+            submitSquat()
             benchRepEntry.delete(0,END)
             benchWeightEntry.delete(0,END)
             squatRepEntry.delete(0,END)
             squatWeightEntry.delete(0,END)
             deadliftWeightEntry.delete(0,END)
             deadliftRepEntry.delete(0,END)
+            messagebox.showinfo("Success", "Data stored for %s"%(date.today()))
+            
+        
+
+
+        #create database and returns cursor to execute further queries
+        def connectDB():
+            return sqlite3.connect("lifts.db")
+
+        
+        def getWeight(lift):
+            if lift == "bench":
+                weight = int(float(benchWeightEntry.get()))
+                return weight
+            elif lift == "squat":
+                weight = int(float(squatWeightEntry.get()))
+                return weight
+            elif lift == "deadlift":
+                weight = int(float(deadliftWeightEntry.get()))
+                return weight
+            else: 
+                return "Error"
+
+        def getReps(lift):
+            if lift == "bench":
+                try:
+                    return int(benchRepEntry.get())
+                except:
+                    messagebox.showerror("Entry Error", "Enter a number for bench reps")
+            elif lift == "squat":
+                try:
+                    return int(squatRepEntry.get())
+                except:
+                    messagebox.showerror("Entry Error", "Enter a number for squat reps")
+            elif lift == "deadlift":
+                try:
+                    return int(deadliftRepEntry.get())
+                except:
+                    messagebox.showerror("Entry Error", "Enter a number deadlift reps")
+            else:
+                return "Error"
+
+
+        #db connector methods
+        def squatDBConnect():
+            conn = connectDB()
+            c = conn.cursor()
+            c.execute("CREATE TABLE IF NOT EXISTS squatStats (date date, weight real, reps int)")
+            conn.commit()
+            conn.close()
+
+        def deadliftDBConnect():
+            conn = connectDB()
+            c = conn.cursor()
+            c.execute("CREATE TABLE IF NOT EXISTS deadliftStats (date date, weight real, reps int)")
+            conn.commit()
+            conn.close()
+    
+        def benchDBConnect():
+            conn = connectDB()
+            c = conn.cursor()
+            c.execute("CREATE TABLE IF NOT EXISTS benchStats (date date, weight real, reps int)")
+            conn.commit()
+            conn.close()
+
+        #method to send stats to database database 
+        def submitSquat():
+            conn = connectDB()
+            c = conn.cursor()
+            c.execute("INSERT INTO squatStats VALUES (:date, :weight, :reps)", {'date' : date.today(), 'weight': getWeight("squat"), 'reps': getReps("squat")})
+            conn.commit()
+            conn.close()
+    
+
+        def submitBench():
+            pass
+
+        def submitDeadlift():
+            pass
+
+
+        #method to view stats and progress
+
+        #TODO: make it so that you don't need to enter every single box to submit value (psosibly separating out results). 
+        #view results with a query
+
+
+
+            
 
 
 

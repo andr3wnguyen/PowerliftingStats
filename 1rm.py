@@ -364,48 +364,67 @@ class Log(tk.Frame):
         backButton.grid(row=0, column=1)
 
         #============================== layout
-
+        #entry boxes for SBD weights
         squatWeightEntry = tk.Entry(self, width=3)
-        squatWeightEntry.place(x=100,y=80)
+        squatWeightEntry.place(x=100,y=82)
         benchWeightEntry = tk.Entry(self, width=3)
-        benchWeightEntry.place(x=100,y=100)
+        benchWeightEntry.place(x=100,y=112)
         deadliftWeightEntry = tk.Entry(self, width=3)
-        deadliftWeightEntry.place(x=100, y=120) 
+        deadliftWeightEntry.place(x=100, y=142) 
 
-        benchLabel = tk.Label(self, text="Bench", relief="ridge",width=9).place(x=10,y=80)
-        squatLabel = tk.Label(self, text="Squat", relief="ridge", width=9).place(x=10,y=100)
-        deadliftLabel = tk.Label(self, text="Deadlift", relief="ridge", width=9).place(x=10,y=120)
+        #labels for SBD 
+        squatLabel = tk.Label(self, text="Squat", relief="ridge",width=9, pady=2).place(x=10,y=80)
+        benchLabel = tk.Label(self, text="Bench", relief="ridge", width=9, pady=2).place(x=10,y=110)
+        deadliftLabel = tk.Label(self, text="Deadlift", relief="ridge", width=9, pady=2).place(x=10,y=140)
 
+        #labels for SBD reps
         squatRepEntry = tk.Entry(self, width=3)
-        squatRepEntry.place(x=170,y=80)
+        squatRepEntry.place(x=170,y=82)
         benchRepEntry = tk.Entry(self, width=3)
-        benchRepEntry.place(x=170,y=100)
+        benchRepEntry.place(x=170,y=112)
         deadliftRepEntry = tk.Entry(self, width=3)
-        deadliftRepEntry.place(x=170,y=120)
+        deadliftRepEntry.place(x=170,y=142)
         repLabel = tk.Label(self, text="Reps", relief="ridge", width=9).place(x=147,y= 60)
         weightLabel = tk.Label(self, text="Weight", relief="ridge", width=9).place(x=78, y=60)
+
 
         queryBox = tk.Frame(self, bd=1, relief="ridge", height=190, width=350)
         queryBox.place(x=10,y=180)
 
 
-        #store button
-        storeButton = tk.Button(self, text="Store lifts", command=lambda:storeData())
-        storeButton.place(x=115,y=148)
+        #log lifts buttons, buttons to press to submit entry box values into the tb
+        storeButton = tk.Button(self, text="Submit Squat", width=12, command=lambda:storeSquatData())
+        storeButton.place(x=220,y=80)
 
-        #sends data to db and deletes data after storing
-        def storeData():
-            squatDBConnect()
+        storeButton = tk.Button(self, text="Submit Bench", width=12,command=lambda:storeBenchData())
+        storeButton.place(x=220,y=110)
+
+        storeButton = tk.Button(self, text="Submit Deadlift", width=12, command=lambda:storeDeadliftData())
+        storeButton.place(x=220,y=140)
+
+        #methods to submit data to table in lifts database, creates table if it doesn't exist
+        def storeSquatData():
+            squatTableCreate()
             submitSquat()
-            benchRepEntry.delete(0,END)
-            benchWeightEntry.delete(0,END)
             squatRepEntry.delete(0,END)
             squatWeightEntry.delete(0,END)
+            messagebox.showinfo("Success", "Squat data stored for %s"%(date.today()))
+
+
+        def storeBenchData():
+            benchTableCreate()
+            submitBench()
+            benchRepEntry.delete(0,END)
+            benchWeightEntry.delete(0,END)
+            messagebox.showinfo("Success", "Bench press data stored for %s"%(date.today()))
+
+        def storeDeadliftData():
+            deadliftTableCreate()
+            submitDeadlift()
             deadliftWeightEntry.delete(0,END)
             deadliftRepEntry.delete(0,END)
-            messagebox.showinfo("Success", "Data stored for %s"%(date.today()))
-            
-        
+            messagebox.showinfo("Success", "Deadlift data stored for %s"%(date.today()))
+
 
 
         #create database and returns cursor to execute further queries
@@ -428,40 +447,32 @@ class Log(tk.Frame):
 
         def getReps(lift):
             if lift == "bench":
-                try:
-                    return int(benchRepEntry.get())
-                except:
-                    messagebox.showerror("Entry Error", "Enter a number for bench reps")
+                    if benchRepEntry.get() != "":
+                        return int(benchRepEntry.get())
             elif lift == "squat":
-                try:
-                    return int(squatRepEntry.get())
-                except:
-                    messagebox.showerror("Entry Error", "Enter a number for squat reps")
+                    if squatRepEntry.get() != "":
+                        return int(squatRepEntry.get())
             elif lift == "deadlift":
-                try:
-                    return int(deadliftRepEntry.get())
-                except:
-                    messagebox.showerror("Entry Error", "Enter a number deadlift reps")
-            else:
-                return "Error"
+                    if deadliftRepEntry.get() != "":
+                        return int(deadliftRepEntry.get())
 
 
         #db connector methods
-        def squatDBConnect():
+        def squatTableCreate():
             conn = connectDB()
             c = conn.cursor()
             c.execute("CREATE TABLE IF NOT EXISTS squatStats (date date, weight real, reps int)")
             conn.commit()
             conn.close()
 
-        def deadliftDBConnect():
+        def deadliftTableCreate():
             conn = connectDB()
             c = conn.cursor()
             c.execute("CREATE TABLE IF NOT EXISTS deadliftStats (date date, weight real, reps int)")
             conn.commit()
             conn.close()
     
-        def benchDBConnect():
+        def benchTableCreate():
             conn = connectDB()
             c = conn.cursor()
             c.execute("CREATE TABLE IF NOT EXISTS benchStats (date date, weight real, reps int)")
@@ -476,18 +487,25 @@ class Log(tk.Frame):
             conn.commit()
             conn.close()
     
-
         def submitBench():
-            pass
+            conn = connectDB()
+            c = conn.cursor()
+            c.execute("INSERT INTO benchStats VALUES (:date, :weight, :reps)", {'date': date.today(), 'weight': getWeight("bench"), 'reps': getReps("bench")})
+            conn.commit()
+            conn.close()
 
         def submitDeadlift():
-            pass
+            conn = connectDB()
+            c = conn.cursor()
+            c.execute("INSERT INTO deadliftStats VALUES (:date, :weight, :reps)", {'date': date.today(), 'weight': getWeight("deadlift"), 'reps': getReps("deadlift")})
+            conn.commit()
+            conn.close()
 
 
         #method to view stats and progress
 
-        #TODO: make it so that you don't need to enter every single box to submit value (psosibly separating out results). 
-        #view results with a query
+        #TODO: 
+        #view results with a query, view past results, scrollbox with query returns for each set. 
 
 
 

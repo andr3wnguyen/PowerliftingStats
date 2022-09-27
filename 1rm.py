@@ -387,11 +387,6 @@ class Log(tk.Frame):
         repLabel = tk.Label(self, text="Reps", relief="ridge", width=9).place(x=147,y= 60)
         weightLabel = tk.Label(self, text="Weight", relief="ridge", width=9).place(x=78, y=60)
 
-
-        queryBox = tk.Frame(self, bd=1, relief="ridge", height=190, width=350)
-        queryBox.place(x=10,y=180)
-
-
         #log lifts buttons, buttons to press to submit entry box values into the tb
         storeButton = tk.Button(self, text="Submit Squat", width=12, command=lambda:storeSquatData())
         storeButton.place(x=220,y=80)
@@ -503,9 +498,58 @@ class Log(tk.Frame):
 
 
         #method to view stats and progress
+        def viewBench():
+            conn = connectDB()
+            c = conn.cursor()
+            return list(c.execute("SELECT * from benchStats"))
+
+        def viewSquat():
+            conn = connectDB()
+            c = conn.cursor()
+            return list(c.execute("SELECT * from squatStats"))
+        
+        def viewDeadlift():
+            conn = connectDB()
+            c = conn.cursor()
+            return (c.execute("SELECT * from deadliftStats"))
+
+
+
+        #frame to hold return info
+        viewBox = tk.Frame(self, bd=1, relief="ridge", height=170, width=200)
+        viewBox.place(x=160,y=195)
+
+        #datalabels for results view
+
+        dateLabelView = tk.Label(self, text = "Date")
+        weightLabelView = tk.Label(self, text = "Weight")
+        repsLabelView = tk.Label(self, text = "Reps")
+        dateLabelView.place(x=180, y=170)
+        weightLabelView.place(x=240, y=170)
+        repsLabelView.place(x=300, y=170)
+
+        #box and scrollbar for results output (disabled text box), resultsBox returns view of results, viewBoxScroll is scrollbar
+        viewBoxScroll = tk.Scrollbar(viewBox,orient="vertical")
+        resultsBox = tk.Text(viewBox, height=10, width=23, yscrollcommand=viewBoxScroll.set)
+        resultsBox.pack(side="left")
+        resultsBox.config(state=DISABLED)
+        viewBoxScroll.config(command=resultsBox.yview())
+        viewBoxScroll.pack(side="right")
+
+        #view buttons
+        squatViewButton = tk.Button(self, text = "View Squats", width=10)
+        benchViewButton = tk.Button(self, text = "View Bench", width=10)
+        deadliftViewButton = tk.Button(self, text = "View Deadlift", width=10)
+        squatViewButton.place(x=30, y=230)
+        benchViewButton.place(x=30, y=270)
+        deadliftViewButton.place(x=30, y=310)
+        
+
+
 
         #TODO: 
         #view results with a query, view past results, scrollbox with query returns for each set. 
+        #button that is pressed to populate the frame with information
 
 
 

@@ -1,6 +1,7 @@
 import sqlite3
 import tkinter as tk
-from tkinter import ACTIVE, DISABLED, END, LEFT, messagebox
+from tkinter import ACTIVE, DISABLED, END, LEFT, NORMAL, messagebox
+from tkinter.scrolledtext import ScrolledText
 from datetime import date
 
 class windows(tk.Tk):
@@ -511,7 +512,7 @@ class Log(tk.Frame):
         def viewDeadlift():
             conn = connectDB()
             c = conn.cursor()
-            return (c.execute("SELECT * from deadliftStats"))
+            return list(c.execute("SELECT * from deadliftStats"))
 
 
 
@@ -525,31 +526,69 @@ class Log(tk.Frame):
         weightLabelView = tk.Label(self, text = "Weight")
         repsLabelView = tk.Label(self, text = "Reps")
         dateLabelView.place(x=180, y=170)
-        weightLabelView.place(x=240, y=170)
-        repsLabelView.place(x=300, y=170)
+        weightLabelView.place(x=260, y=170)
+        repsLabelView.place(x=320, y=170)
 
         #box and scrollbar for results output (disabled text box), resultsBox returns view of results, viewBoxScroll is scrollbar
-        viewBoxScroll = tk.Scrollbar(viewBox,orient="vertical")
-        resultsBox = tk.Text(viewBox, height=10, width=23, yscrollcommand=viewBoxScroll.set)
+        resultsBox = ScrolledText(viewBox, height=10, width=23)
         resultsBox.pack(side="left")
         resultsBox.config(state=DISABLED)
-        viewBoxScroll.config(command=resultsBox.yview())
-        viewBoxScroll.pack(side="right")
+
+        #formatting results returned from query
+        def formatDeadliftData():
+            a = viewDeadlift()
+            resultString = ""
+            for i in range(len(a)):
+                resultString += str(a[i][0]) + "   " + str(a[i][1]) + "   " +str(a[i][2]) + "\n"
+            return resultString
+
+        def formatSquatData():
+            a = viewSquat()
+            resultString = ""
+            for i in range(len(a)):
+                resultString += str(a[i][0]) + "   " + str(a[i][1]) + "   " +str(a[i][2]) + "\n"
+            return resultString
+
+        def formatBenchData():
+            a = viewBench()
+            resultString = ""
+            for i in range(len(a)):
+                resultString += str(a[i][0]) + "   " + str(a[i][1]) + "   " +str(a[i][2]) + "\n"
+            return resultString
+
+        #return results to the text widget (resultBox)
+        def getDeadlift():
+            resultsBox.config(state=NORMAL)
+            resultsBox.delete("1.0", END)
+            resultsBox.insert("1.0",str(formatDeadliftData()))
+            resultsBox.config(state=DISABLED)
+
+        def getSquat():
+            resultsBox.config(state=NORMAL)
+            resultsBox.delete("1.0", END)
+            resultsBox.insert("1.0",str(formatSquatData()))
+            resultsBox.config(state=DISABLED)
+
+        def getBench():
+            resultsBox.config(state=NORMAL)
+            resultsBox.delete("1.0", END)
+            resultsBox.insert("1.0",str(formatBenchData()))
+            resultsBox.config(state=DISABLED)
 
         #view buttons
-        squatViewButton = tk.Button(self, text = "View Squats", width=10)
-        benchViewButton = tk.Button(self, text = "View Bench", width=10)
-        deadliftViewButton = tk.Button(self, text = "View Deadlift", width=10)
+        squatViewButton = tk.Button(self, text = "View Squats", width=10, command = lambda:getSquat())
+        benchViewButton = tk.Button(self, text = "View Bench", width=10, command = lambda:getBench())
+        deadliftViewButton = tk.Button(self, text = "View Deadlift", width=10, command = lambda:getDeadlift())
         squatViewButton.place(x=30, y=230)
         benchViewButton.place(x=30, y=270)
         deadliftViewButton.place(x=30, y=310)
+
         
 
 
 
         #TODO: 
-        #view results with a query, view past results, scrollbox with query returns for each set. 
-        #button that is pressed to populate the frame with information
+        #formatting retrieved results to return in a more uniform manner, no 'none value'.
 
 
 

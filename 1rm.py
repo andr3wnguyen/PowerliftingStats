@@ -401,25 +401,35 @@ class Log(tk.Frame):
         #methods to submit data to table in lifts database, creates table if it doesn't exist
         def storeSquatData():
             squatTableCreate()
-            submitSquat()
-            squatRepEntry.delete(0,END)
-            squatWeightEntry.delete(0,END)
-            messagebox.showinfo("Success", "Squat data stored for %s"%(date.today()))
+            if type(getWeight("squat")) == int and type(getReps("squat")) == int:
+                submitSquat()
+                squatRepEntry.delete(0,END)
+                squatWeightEntry.delete(0,END)
+                messagebox.showinfo("Success", "Squat data stored for %s"%(date.today()))
+            else:
+                messagebox.showinfo("Error", "Missing parameter, check weight or number of reps is input correctly.")
+
 
 
         def storeBenchData():
             benchTableCreate()
-            submitBench()
-            benchRepEntry.delete(0,END)
-            benchWeightEntry.delete(0,END)
-            messagebox.showinfo("Success", "Bench press data stored for %s"%(date.today()))
+            if type(getWeight("bench")) == int and type(getReps("bench")) == int:
+                submitBench()
+                benchRepEntry.delete(0,END)
+                benchWeightEntry.delete(0,END)
+                messagebox.showinfo("Success", "Bench press data stored for %s"%(date.today()))
+            else:
+                messagebox.showinfo("Error", "Missing parameter, check weight or number of reps is input correctly.")
 
         def storeDeadliftData():
             deadliftTableCreate()
-            submitDeadlift()
-            deadliftWeightEntry.delete(0,END)
-            deadliftRepEntry.delete(0,END)
-            messagebox.showinfo("Success", "Deadlift data stored for %s"%(date.today()))
+            if type(getWeight("deadlift")) == int and type(getReps("deadlift")) == int:
+                submitDeadlift()
+                deadliftWeightEntry.delete(0,END)
+                deadliftRepEntry.delete(0,END)
+                messagebox.showinfo("Success", "Deadlift data stored for %s"%(date.today()))
+            else:
+                messagebox.showinfo("Error", "Missing parameter, check weight or number of reps is input correctly.")
 
 
 
@@ -443,14 +453,20 @@ class Log(tk.Frame):
 
         def getReps(lift):
             if lift == "bench":
-                    if benchRepEntry.get() != "":
+                    if benchRepEntry.get() != "" and benchRepEntry.get() != None:
                         return int(benchRepEntry.get())
+                    else:
+                        messagebox.showerror("Please insert a value for number of reps")
             elif lift == "squat":
-                    if squatRepEntry.get() != "":
+                    if squatRepEntry.get() != "" and squatRepEntry.get() != None:
                         return int(squatRepEntry.get())
+                    else:
+                        messagebox.showerror("Please insert a value for number of reps")
             elif lift == "deadlift":
-                    if deadliftRepEntry.get() != "":
+                    if deadliftRepEntry.get() != "" and deadliftRepEntry.get() != None:
                         return int(deadliftRepEntry.get())
+                    else:
+                        messagebox.showerror("Please insert a value for number of reps")
 
 
         #db connector methods
@@ -529,7 +545,7 @@ class Log(tk.Frame):
         weightLabelView.place(x=260, y=170)
         repsLabelView.place(x=320, y=170)
 
-        #box and scrollbar for results output (disabled text box), resultsBox returns view of results, viewBoxScroll is scrollbar
+        #ScrolledText widget for results output (disabled text box), resultsBox returns view of results, viewBoxScroll is scrollbar
         resultsBox = ScrolledText(viewBox, height=10, width=23)
         resultsBox.pack(side="left")
         resultsBox.config(state=DISABLED)
@@ -588,7 +604,8 @@ class Log(tk.Frame):
 
 
         #TODO: 
-        #formatting retrieved results to return in a more uniform manner, no 'none value'.
+        #formatting retrieved results to not go onto next line/whitespace alterations
+        #database tools form (delete or change entries, or add specific dates; new form with additional tools/widgets
 
 
 

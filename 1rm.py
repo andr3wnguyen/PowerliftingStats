@@ -1,6 +1,7 @@
+from re import X
 import sqlite3
 import tkinter as tk
-from tkinter import ACTIVE, DISABLED, END, LEFT, NORMAL, messagebox
+from tkinter import ACTIVE, DISABLED, END, LEFT, NORMAL, RIDGE, messagebox
 from tkinter.scrolledtext import ScrolledText
 from datetime import date
 
@@ -22,7 +23,7 @@ class windows(tk.Tk):
 
         ##initiates dictionary of frames, each frame is set up to be in the container as an instance (container, self)
         self.frames = {}
-        for F in (MainPage, OneRMPage, ProgrammesPage, HelpPage, Log):
+        for F in (MainPage, OneRMPage, ProgrammesPage, HelpPage, Log, DatabaseTools):
             frame = F(container, self) 
             self.frames[F] = frame #adds iteration of the frame instance at key F into the self.frames dict
             frame.grid(row=0, column=0, sticky="nsew")
@@ -40,20 +41,20 @@ class MainPage(tk.Frame): #inherits from Frame
         label = tk.Label(self,text="Powerlifting Helper", relief="solid", font="verdana 20")
         label.place(x=50,y=150)
 
-        oneRMButton = tk.Button(self,text="1 Rep Max Calculator", command=lambda:controller.show_frame(OneRMPage))
-        oneRMButton.place(x=10,y=200)
+        oneRMButton = tk.Button(self,text="1 Rep Max Calculator", width=15, command=lambda:controller.show_frame(OneRMPage))
+        oneRMButton.place(x=120,y=200)
 
-        programmesButton = tk.Button(self,text="Programmes", command=lambda:controller.show_frame(ProgrammesPage))
-        programmesButton.place(x=10,y=230)
+        programmesButton = tk.Button(self,text="Programmes", width=15, command=lambda:controller.show_frame(ProgrammesPage))
+        programmesButton.place(x=120,y=230)
 
-        logButton = tk.Button(self, text="Lift Log", command=lambda:controller.show_frame(Log))
-        logButton.place(x=10,y=260)
+        logButton = tk.Button(self, text="Lift Log", width=15, command=lambda:controller.show_frame(Log))
+        logButton.place(x=120,y=260)
 
-        helpButton = tk.Button(self, text="Help", command=lambda:controller.show_frame(HelpPage))
-        helpButton.place(x=10,y=290)
+        helpButton = tk.Button(self, text="Help", width=15, command=lambda:controller.show_frame(HelpPage))
+        helpButton.place(x=120,y=290)
 
-        quitButton = tk.Button(self, text="Quit", command=lambda:windows.quit(self))
-        quitButton.place(x=10,y=320)
+        quitButton = tk.Button(self, text="Quit", width=15, command=lambda:windows.quit(self))
+        quitButton.place(x=120,y=320)
 
 class OneRMPage(tk.Frame):
     def __init__(self, parent, controller): 
@@ -67,7 +68,7 @@ class OneRMPage(tk.Frame):
         helpButton = tk.Button(self, text="Help", command=lambda:messagebox.showinfo("Help", "Enter your the weight you have lifted into the 'Weight lifted:' box and select the number of completed repetitions from the drop-down. \nPress submit to see your estimated 1-rep maxes. These can be used for your workout programs. \n\nPress 'Show percentages' to see your working weight percentages."))
         helpButton.grid(row=0,column=2)
 
-        backButton = tk.Button(self, text="Go back", command = lambda:controller.show_frame(MainPage))
+        backButton = tk.Button(self, text="Home", command = lambda:controller.show_frame(MainPage))
         backButton.grid(row=0, column=1)
                
         #result output
@@ -170,7 +171,7 @@ class ProgrammesPage(tk.Frame):
         helpButton = tk.Button(self, text="Help", command=lambda:messagebox.showinfo("Help", "Enter your calculated or actual 1RM values into the boxes and click on your preferred training regime! \n\nInformation for each programme will be shown at the bottom."))
         helpButton.grid(row=0,column=2)
 
-        backButton = tk.Button(self, text="Go back", command = lambda:controller.show_frame(MainPage))
+        backButton = tk.Button(self, text="Home", command = lambda:controller.show_frame(MainPage))
         backButton.grid(row=0, column=1)
 
         #Frame for calendar weekly routine
@@ -343,7 +344,7 @@ class HelpPage(tk.Frame):
         helpButton = tk.Button(self, text="Help", command=lambda:messagebox.showinfo("Help"))
         helpButton.grid(row=0,column=2)
 
-        backButton = tk.Button(self, text="Go back", command = lambda:controller.show_frame(MainPage))
+        backButton = tk.Button(self, text="Home", command = lambda:controller.show_frame(MainPage))
         backButton.grid(row=0, column=1)
 
         
@@ -361,7 +362,7 @@ class Log(tk.Frame):
         helpButton = tk.Button(self, text="Help", command=lambda:messagebox.showinfo("Help"))
         helpButton.grid(row=0,column=2)
 
-        backButton = tk.Button(self, text="Go back", command = lambda:controller.show_frame(MainPage))
+        backButton = tk.Button(self, text="Home", command = lambda:controller.show_frame(MainPage))
         backButton.grid(row=0, column=1)
 
         #============================== layout
@@ -592,14 +593,106 @@ class Log(tk.Frame):
             resultsBox.config(state=DISABLED)
 
         #view buttons
-        squatViewButton = tk.Button(self, text = "View Squats", width=10, command = lambda:getSquat())
-        benchViewButton = tk.Button(self, text = "View Bench", width=10, command = lambda:getBench())
-        deadliftViewButton = tk.Button(self, text = "View Deadlift", width=10, command = lambda:getDeadlift())
-        squatViewButton.place(x=30, y=230)
-        benchViewButton.place(x=30, y=270)
-        deadliftViewButton.place(x=30, y=310)
+        squatViewButton = tk.Button(self, text = "View Squats", width=12, command = lambda:getSquat())
+        benchViewButton = tk.Button(self, text = "View Bench", width=12, command = lambda:getBench())
+        deadliftViewButton = tk.Button(self, text = "View Deadlift", width=12, command = lambda:getDeadlift())
+        squatViewButton.place(x=30, y=210)
+        benchViewButton.place(x=30, y=240)
+        deadliftViewButton.place(x=30, y=270)
 
+        databaseToolsButton = tk.Button(self, text = "Database Tools", width=12, command = lambda:controller.show_frame(DatabaseTools))
+        databaseToolsButton.place(x=30, y=330)
+
+
+
+
+class DatabaseTools(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = tk.Label(self, text="Database Tools",relief="solid").place(x=150, y=30)
+
+        #buttons at top of page
+        quit = tk.Button(self, text="Quit", command=lambda:windows.quit(self))
+        quit.grid(row=0, column=3)
+
+        helpButton = tk.Button(self, text="Help", command=lambda:messagebox.showinfo("Help", "Enter your calculated or actual 1RM values into the boxes and click on your preferred training regime! \n\nInformation for each programme will be shown at the bottom."))
+        helpButton.grid(row=0,column=2)
+
+        homeButton = tk.Button(self, text="Home", command = lambda:controller.show_frame(MainPage))
+        homeButton.grid(row=0, column=1)
+
+        def connectDB(): 
+            return sqlite3.connect("lifts.db")
+
+
+
+        #delete/reset tables
+        def resetTable(lift):
+            try:
+                conn = connectDB()
+                c = conn.cursor()
+                try:
+                    c.execute("DROP TABLE %s" %(lift))
+                    c.close()
+                    changeInfo.config(text="%s table reset successfully."%(lift).capitalize())
+                except:
+                    changeInfo.config(text="%s table does not exist.\n Please enter an entry through Log." %(lift).capitalize())
+            except:
+                changeInfo.config(text="%s database does not exist. \n Please enter an entry through Log." %(lift).capitalize())
+
+
+
+
+        #delete specific
+        def deleteSpecific(lift, date):
+            pass
+
+
+        #insert specific via date, weight, rep
+        def insertSpecific(lift, date):
+            pass
         
+
+        #buttons to clear databases 
+        resetSquat = tk.Button(self, text = "Clear Squat Data", width = 14, command = lambda: resetTable("squatStats"))
+        resetBench = tk.Button(self, text = "Clear Bench Data", width = 14, command = lambda: resetTable("benchStats"))
+        resetDeadlift = tk.Button(self, text = "Clear Deadlift Data", width = 14, command = lambda: resetTable("deadliftStats"))
+        resetSquat.place(x=10, y=100)
+        resetBench.place(x=10, y=130)
+        resetDeadlift.place(x=10, y=160)
+
+        #buttons to delete specific info at certain dates
+        resetSquat = tk.Button(self, text = "Delete Squat", width = 14, command = lambda: resetTable("squat"))
+        resetBench = tk.Button(self, text = "Delete Bench", width = 14, command = lambda: resetTable("bench"))
+        resetDeadlift = tk.Button(self, text = "Delete Deadlift", width = 14, command = lambda: resetTable("deadlift"))
+        resetSquat.place(x=130, y=100)
+        resetBench.place(x=130, y=130)
+        resetDeadlift.place(x=130, y=160)
+
+        #buttons to add data at specific date
+        addSquat = tk.Button(self, text = "Add Squat", width = 14, command = lambda: resetTable("squat"))
+        addBench = tk.Button(self, text = "Add Bench", width = 14, command = lambda: resetTable("bench"))
+        addDeadlift = tk.Button(self, text = "Add Deadlift", width = 14, command = lambda: resetTable("deadlift"))
+        addSquat.place(x=250, y=100)
+        addBench.place(x=250, y=130)
+        addDeadlift.place(x=250, y=160)
+
+        #label to confirm changes
+        changeInfo = tk.Label(self, text ="", width = 30, height=3, relief=RIDGE)
+        changeInfo.place(x=70,y=210)
+
+        #back to log page
+        backButton = tk.Button(self, text = "Back", width = 14, command = lambda:controller.show_frame(Log))
+        backButton.place(x=130,y=300)
+
+
+
+
+
+
+
+
+            
 
 
 

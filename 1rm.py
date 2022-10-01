@@ -1,7 +1,7 @@
 from re import X
 import sqlite3
 import tkinter as tk
-from tkinter import ACTIVE, DISABLED, END, LEFT, NORMAL, RIDGE, messagebox
+from tkinter import ACTIVE, DISABLED, END, LEFT, NORMAL, RIDGE, Toplevel, messagebox
 from tkinter.scrolledtext import ScrolledText
 from datetime import date
 
@@ -390,14 +390,15 @@ class Log(tk.Frame):
         weightLabel = tk.Label(self, text="Weight", relief="ridge", width=9).place(x=78, y=60)
 
         #log lifts buttons, buttons to press to submit entry box values into the tb
-        storeButton = tk.Button(self, text="Submit Squat", width=12, command=lambda:storeSquatData())
-        storeButton.place(x=220,y=80)
+        storeSquatButton = tk.Button(self, text="Submit Squat", width=12, command=lambda:storeSquatData())
+        storeSquatButton.place(x=220,y=80)
 
-        storeButton = tk.Button(self, text="Submit Bench", width=12,command=lambda:storeBenchData())
-        storeButton.place(x=220,y=110)
+        storeBenchButton = tk.Button(self, text="Submit Bench", width=12,command=lambda:storeBenchData())
+        storeBenchButton.place(x=220,y=110)
 
-        storeButton = tk.Button(self, text="Submit Deadlift", width=12, command=lambda:storeDeadliftData())
-        storeButton.place(x=220,y=140)
+        storeDeadliftButton = tk.Button(self, text="Submit Deadlift", width=12, command=lambda:storeDeadliftData())
+        storeDeadliftButton.place(x=220,y=140)
+
 
         #methods to submit data to table in lifts database, creates table if it doesn't exist
         def storeSquatData():
@@ -621,10 +622,24 @@ class DatabaseTools(tk.Frame):
         homeButton = tk.Button(self, text="Home", command = lambda:controller.show_frame(MainPage))
         homeButton.grid(row=0, column=1)
 
+
+
+        #entry for date/weight/rate
+        dateEntry = tk.Entry(self, width=10)
+        weightEntry = tk.Entry(self, width=10)
+        repEntry = tk.Entry(self, width=10)
+        dateEntry.place(x=180, y=200)
+        weightEntry.place(x=180, y=220)
+        repEntry.place(x=180, y=240)
+
+        #labels for entry
+        dateLabel = tk.Label(self, width=6, relief=RIDGE, text="Date:").place(x=120, y=200)
+        weightLabel = tk.Label(self, width=6, relief=RIDGE, text="Weight:").place(x=120, y=220)
+        repLabel = tk.Label(self, width=6, relief=RIDGE, text="Reps:").place(x=120, y=240)
+
+
         def connectDB(): 
             return sqlite3.connect("lifts.db")
-
-
 
         #delete/reset tables
         def resetTable(lift):
@@ -642,10 +657,24 @@ class DatabaseTools(tk.Frame):
 
 
 
-
         #delete specific
-        def deleteSpecific(lift, date):
-            pass
+        def deleteSpecific(lift):
+            dateToDelete = dateEntry.get()
+            try:
+                conn = connectDB()
+                c = conn.cursor()
+                try:
+                    c.execute("DELETE FROM %s WHERE date = %s"%(lift, dateToDelete))
+                    c.commit()
+                    c.close()
+                    changeInfo.config(text="%s deleted successfully from %s."%(dateToDelete, lift))
+                except:
+                    changeInfo.config(text="Could not delete %s from %s table." %(dateToDelete, lift))
+            except:
+                changeInfo.config(text="%s database does not exist. \n Please enter an entry through Log." %(lift).capitalize())
+
+            
+
 
 
         #insert specific via date, weight, rep
@@ -662,7 +691,7 @@ class DatabaseTools(tk.Frame):
         resetDeadlift.place(x=10, y=160)
 
         #buttons to delete specific info at certain dates
-        resetSquat = tk.Button(self, text = "Delete Squat", width = 14, command = lambda: resetTable("squat"))
+        resetSquat = tk.Button(self, text = "Delete Squat", width = 14, command = lambda: deleteSpecific("squat"))
         resetBench = tk.Button(self, text = "Delete Bench", width = 14, command = lambda: resetTable("bench"))
         resetDeadlift = tk.Button(self, text = "Delete Deadlift", width = 14, command = lambda: resetTable("deadlift"))
         resetSquat.place(x=130, y=100)
@@ -678,12 +707,12 @@ class DatabaseTools(tk.Frame):
         addDeadlift.place(x=250, y=160)
 
         #label to confirm changes
-        changeInfo = tk.Label(self, text ="", width = 30, height=3, relief=RIDGE)
-        changeInfo.place(x=70,y=210)
+        changeInfo = tk.Label(self, text ="", width = 40, height=3, relief=RIDGE)
+        changeInfo.place(x=50,y=280)
 
         #back to log page
         backButton = tk.Button(self, text = "Back", width = 14, command = lambda:controller.show_frame(Log))
-        backButton.place(x=130,y=300)
+        backButton.place(x=130,y=350)
 
 
 
@@ -697,8 +726,8 @@ class DatabaseTools(tk.Frame):
 
 
         #TODO: 
-        #formatting retrieved results to not go onto next line/whitespace alterations
         #database tools form (delete or change entries, or add specific dates; new form with additional tools/widgets
+        #resolve problem with deleting specific date lifts
 
 
 

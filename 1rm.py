@@ -520,17 +520,26 @@ class Log(tk.Frame):
         def viewBench():
             conn = connectDB()
             c = conn.cursor()
-            return list(c.execute("SELECT * from benchStats"))
+            try:
+                return list(c.execute("SELECT * from benchStats"))
+            except:
+                return ""
 
         def viewSquat():
             conn = connectDB()
             c = conn.cursor()
-            return list(c.execute("SELECT * from squatStats"))
+            try:
+                return list(c.execute("SELECT * from squatStats"))
+            except:
+                return ""
         
         def viewDeadlift():
             conn = connectDB()
             c = conn.cursor()
-            return list(c.execute("SELECT * from deadliftStats"))
+            try:
+                return list(c.execute("SELECT * from deadliftStats"))
+            except:
+                return ""            
 
 
 
@@ -558,21 +567,30 @@ class Log(tk.Frame):
             resultString = ""
             for i in range(len(a)):
                 resultString += str(a[i][0]) + "   " + str(a[i][1]) + "   " +str(a[i][2]) + "\n"
-            return resultString
+            if len(resultString) >0:
+                return resultString
+            else:
+                return "No data found."
 
         def formatSquatData():
             a = viewSquat()
             resultString = ""
             for i in range(len(a)):
                 resultString += str(a[i][0]) + "   " + str(a[i][1]) + "   " +str(a[i][2]) + "\n"
-            return resultString
+            if len(resultString) >0:
+                return resultString
+            else:
+                return "No data found."
 
         def formatBenchData():
             a = viewBench()
             resultString = ""
             for i in range(len(a)):
                 resultString += str(a[i][0]) + "   " + str(a[i][1]) + "   " +str(a[i][2]) + "\n"
-            return resultString
+            if len(resultString) > 0:
+                return resultString
+            else:
+                return "No data found."
 
         #return results to the text widget (resultBox)
         def getDeadlift():
@@ -647,31 +665,37 @@ class DatabaseTools(tk.Frame):
                 conn = connectDB()
                 c = conn.cursor()
                 try:
-                    c.execute("DROP TABLE %s" %(lift))
+                    c.execute("DROP TABLE %sstats" %(lift))
                     c.close()
                     changeInfo.config(text="%s table reset successfully."%(lift).capitalize())
                 except:
                     changeInfo.config(text="%s table does not exist.\n Please enter an entry through Log." %(lift).capitalize())
             except:
-                changeInfo.config(text="%s database does not exist. \n Please enter an entry through Log." %(lift).capitalize())
+                changeInfo.config(text="Database error/does not exist. \n Please input an entry through Log to create database.")
 
 
 
-        #delete specific
+        #delete specific lift's data at time specified in the entry box (dateEntry on db page)
         def deleteSpecific(lift):
             dateToDelete = dateEntry.get()
             try:
                 conn = connectDB()
                 c = conn.cursor()
                 try:
-                    c.execute("DELETE FROM %s WHERE date = %s"%(lift, dateToDelete))
-                    c.commit()
-                    c.close()
-                    changeInfo.config(text="%s deleted successfully from %s."%(dateToDelete, lift))
+                    if len(dateToDelete) > 0:
+                        if len(list(c.execute("SELECT * FROM %sstats where date = '%s'"%(lift, dateToDelete))))>0: #checks if date exists in table
+                            c.execute("DELETE FROM %sstats WHERE date = '%s'"%(lift, dateToDelete)) #deletes row containing date from entry box   
+                            conn.commit()
+                            conn.close()
+                            changeInfo.config(text="%s deleted successfully from %s table."%(dateToDelete, lift))
+                        else:
+                            changeInfo.config(text="No data to delete for %s from %s table."%(dateToDelete, lift))                            
+                    else:
+                        changeInfo.config(text="No date input to be deleted.")
                 except:
                     changeInfo.config(text="Could not delete %s from %s table." %(dateToDelete, lift))
             except:
-                changeInfo.config(text="%s database does not exist. \n Please enter an entry through Log." %(lift).capitalize())
+                changeInfo.config(text="Database error/does not exist. \n Please input an entry through Log to create database.")
 
             
 
@@ -683,20 +707,20 @@ class DatabaseTools(tk.Frame):
         
 
         #buttons to clear databases 
-        resetSquat = tk.Button(self, text = "Clear Squat Data", width = 14, command = lambda: resetTable("squatStats"))
-        resetBench = tk.Button(self, text = "Clear Bench Data", width = 14, command = lambda: resetTable("benchStats"))
-        resetDeadlift = tk.Button(self, text = "Clear Deadlift Data", width = 14, command = lambda: resetTable("deadliftStats"))
+        resetSquat = tk.Button(self, text = "Clear Squat Data", width = 14, command = lambda: resetTable("squat"))
+        resetBench = tk.Button(self, text = "Clear Bench Data", width = 14, command = lambda: resetTable("bench"))
+        resetDeadlift = tk.Button(self, text = "Clear Deadlift Data", width = 14, command = lambda: resetTable("deadlift"))
         resetSquat.place(x=10, y=100)
         resetBench.place(x=10, y=130)
         resetDeadlift.place(x=10, y=160)
 
         #buttons to delete specific info at certain dates
-        resetSquat = tk.Button(self, text = "Delete Squat", width = 14, command = lambda: deleteSpecific("squat"))
-        resetBench = tk.Button(self, text = "Delete Bench", width = 14, command = lambda: resetTable("bench"))
-        resetDeadlift = tk.Button(self, text = "Delete Deadlift", width = 14, command = lambda: resetTable("deadlift"))
-        resetSquat.place(x=130, y=100)
-        resetBench.place(x=130, y=130)
-        resetDeadlift.place(x=130, y=160)
+        deleteSquat = tk.Button(self, text = "Delete Squat", width = 14, command = lambda: deleteSpecific("squat"))
+        deleteBench = tk.Button(self, text = "Delete Bench", width = 14, command = lambda: deleteSpecific("bench"))
+        deleteDeadlift = tk.Button(self, text = "Delete Deadlift", width = 14, command = lambda: deleteSpecific("deadlift"))
+        deleteSquat.place(x=130, y=100)
+        deleteBench.place(x=130, y=130)
+        deleteDeadlift.place(x=130, y=160)
 
         #buttons to add data at specific date
         addSquat = tk.Button(self, text = "Add Squat", width = 14, command = lambda: resetTable("squat"))
@@ -727,7 +751,7 @@ class DatabaseTools(tk.Frame):
 
         #TODO: 
         #database tools form (delete or change entries, or add specific dates; new form with additional tools/widgets
-        #resolve problem with deleting specific date lifts
+        #addition of specific dates/weights/reps
 
 
 

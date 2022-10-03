@@ -1,9 +1,10 @@
-from re import X
+import re
 import sqlite3
 import tkinter as tk
-from tkinter import ACTIVE, DISABLED, END, LEFT, NORMAL, RIDGE, Toplevel, messagebox
+from tkinter import ACTIVE, DISABLED, END, NORMAL, RIDGE, Toplevel, messagebox
 from tkinter.scrolledtext import ScrolledText
 from datetime import date
+
 
 class windows(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -655,6 +656,15 @@ class DatabaseTools(tk.Frame):
         weightLabel = tk.Label(self, width=6, relief=RIDGE, text="Weight:").place(x=120, y=220)
         repLabel = tk.Label(self, width=6, relief=RIDGE, text="Reps:").place(x=120, y=240)
 
+        def validDate(date):
+            reDate = '\d{4}-\d{2}-\d{2}'
+            a = re.fullmatch(reDate,date)
+            if a!=None:
+                return True
+            else:
+                return False
+
+
 
         def connectDB(): 
             return sqlite3.connect("lifts.db")
@@ -682,7 +692,7 @@ class DatabaseTools(tk.Frame):
                 conn = connectDB()
                 c = conn.cursor()
                 try:
-                    if len(dateToDelete) > 0:
+                    if len(dateToDelete) > 0 and validDate(dateToDelete):
                         if len(list(c.execute("SELECT * FROM %sstats where date = '%s'"%(lift, dateToDelete))))>0: #checks if date exists in table
                             c.execute("DELETE FROM %sstats WHERE date = '%s'"%(lift, dateToDelete)) #deletes row containing date from entry box   
                             conn.commit()
@@ -691,19 +701,37 @@ class DatabaseTools(tk.Frame):
                         else:
                             changeInfo.config(text="No data to delete for %s from %s table."%(dateToDelete, lift))                            
                     else:
-                        changeInfo.config(text="No date input to be deleted.")
+                        changeInfo.config(text="Invalid date.")
                 except:
                     changeInfo.config(text="Could not delete %s from %s table." %(dateToDelete, lift))
             except:
                 changeInfo.config(text="Database error/does not exist. \n Please input an entry through Log to create database.")
 
-            
-
-
 
         #insert specific via date, weight, rep
-        def insertSpecific(lift, date):
-            pass
+        def insertSpecific(lift):
+            userdate = dateEntry.get()
+            weight = weightEntry.get()
+            reps = repEntry.get()
+            try:
+                conn = connectDB()
+                c = conn.cursor()
+                try:
+                    if len(userdate) > 0 and len(weight) > 0 and len(reps) > 0:
+                        if validDate(userdate):
+                            c.execute("INSERT INTO %sstats VALUES (%s,%s,%s)"%(lift,userdate,weight,reps))
+                            conn.commit()
+                            conn.close()
+                            changeInfo.config(text = "%s x %s on %s added successfully to %s table."%(weight,reps,userdate, lift))
+                        else:
+                            changeInfo.config(text = "Invalid date format, please insert date yyyy-mm-dd")
+                    else:
+                        changeInfo.config(text = "Invalid input. \nPlease ensure date, weight and reps boxes are filled in.")
+                except:
+                    changeInfo.config(text="Cannot add data to table. \n Try inserting an entry through Log first.")
+            except:
+                changeInfo.config(text="Database error/does not exist. \n Please input an entry through Log to create database.")
+
         
 
         #buttons to clear databases 
@@ -723,9 +751,9 @@ class DatabaseTools(tk.Frame):
         deleteDeadlift.place(x=130, y=160)
 
         #buttons to add data at specific date
-        addSquat = tk.Button(self, text = "Add Squat", width = 14, command = lambda: resetTable("squat"))
-        addBench = tk.Button(self, text = "Add Bench", width = 14, command = lambda: resetTable("bench"))
-        addDeadlift = tk.Button(self, text = "Add Deadlift", width = 14, command = lambda: resetTable("deadlift"))
+        addSquat = tk.Button(self, text = "Add Squat", width = 14, command = lambda: insertSpecific("squat"))
+        addBench = tk.Button(self, text = "Add Bench", width = 14, command = lambda: insertSpecific("bench"))
+        addDeadlift = tk.Button(self, text = "Add Deadlift", width = 14, command = lambda: insertSpecific("deadlift"))
         addSquat.place(x=250, y=100)
         addBench.place(x=250, y=130)
         addDeadlift.place(x=250, y=160)
@@ -751,7 +779,7 @@ class DatabaseTools(tk.Frame):
 
         #TODO: 
         #database tools form (delete or change entries, or add specific dates; new form with additional tools/widgets
-        #addition of specific dates/weights/reps
+        #sort date out date issue on line 713, date conversion using split()? 
 
 
 

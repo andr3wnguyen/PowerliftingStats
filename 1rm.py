@@ -60,7 +60,7 @@ class MainPage(tk.Frame): #inherits from Frame
 class OneRMPage(tk.Frame):
     def __init__(self, parent, controller): 
         tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Calculate your 1RM", relief="solid").place(x=150, y=30)
+        label = tk.Label(self, text="Calculate your 1RM", relief="solid", font=("Arial",12)).place(x=150, y=30)
         
         #buttons at top of page
         quit = tk.Button(self, text="Quit", command=lambda:windows.quit(self))
@@ -163,7 +163,7 @@ class OneRMPage(tk.Frame):
 class ProgrammesPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Programmes List",relief="solid").place(x=150, y=30)
+        titleLabel = tk.Label(self, text="Programmes List",relief="solid", font=("Arial",12)).place(x=140, y=30)
         
         #buttons at top of page
         quit = tk.Button(self, text="Quit", command=lambda:windows.quit(self))
@@ -336,7 +336,7 @@ class ProgrammesPage(tk.Frame):
 class HelpPage(tk.Frame):
     def __init__(self,parent,controller):
         tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Help Page").place(x=150, y=30)
+        label = tk.Label(self, text="Help Page",relief="solid", font=("Arial",12)).place(x=150, y=30)
         
         #buttons at top of page
         quit = tk.Button(self, text="Quit", command=lambda:windows.quit(self))
@@ -354,7 +354,7 @@ class HelpPage(tk.Frame):
 class Log(tk.Frame): 
     def __init__(self,parent,controller):
         tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Gym Log", relief="solid").place(x=150, y=30)
+        label = tk.Label(self, text="Gym Log", relief="solid", font=("Arial",12)).place(x=140, y=30)
         
         #buttons at top of page
         quit = tk.Button(self, text="Quit", command=lambda:windows.quit(self))
@@ -476,21 +476,21 @@ class Log(tk.Frame):
         def squatTableCreate():
             conn = connectDB()
             c = conn.cursor()
-            c.execute("CREATE TABLE IF NOT EXISTS squatStats (date date, weight real, reps int)")
+            c.execute("CREATE TABLE IF NOT EXISTS squatStats (date text, weight real, reps int)")
             conn.commit()
             conn.close()
 
         def deadliftTableCreate():
             conn = connectDB()
             c = conn.cursor()
-            c.execute("CREATE TABLE IF NOT EXISTS deadliftStats (date date, weight real, reps int)")
+            c.execute("CREATE TABLE IF NOT EXISTS deadliftStats (date text, weight real, reps int)")
             conn.commit()
             conn.close()
     
         def benchTableCreate():
             conn = connectDB()
             c = conn.cursor()
-            c.execute("CREATE TABLE IF NOT EXISTS benchStats (date date, weight real, reps int)")
+            c.execute("CREATE TABLE IF NOT EXISTS benchStats (date text, weight real, reps int)")
             conn.commit()
             conn.close()
 
@@ -522,7 +522,7 @@ class Log(tk.Frame):
             conn = connectDB()
             c = conn.cursor()
             try:
-                return list(c.execute("SELECT * from benchStats"))
+                return list(c.execute("SELECT * from benchStats ORDER BY date ASC"))
             except:
                 return ""
 
@@ -530,7 +530,7 @@ class Log(tk.Frame):
             conn = connectDB()
             c = conn.cursor()
             try:
-                return list(c.execute("SELECT * from squatStats"))
+                return list(c.execute("SELECT * from squatStats ORDER BY date ASC"))
             except:
                 return ""
         
@@ -538,7 +538,7 @@ class Log(tk.Frame):
             conn = connectDB()
             c = conn.cursor()
             try:
-                return list(c.execute("SELECT * from deadliftStats"))
+                return list(c.execute("SELECT * from deadliftStats ORDER BY date ASC"))
             except:
                 return ""            
 
@@ -546,19 +546,18 @@ class Log(tk.Frame):
 
         #frame to hold return info
         viewBox = tk.Frame(self, bd=1, relief="ridge", height=170, width=200)
-        viewBox.place(x=160,y=195)
+        viewBox.place(x=150,y=195)
 
         #datalabels for results view
 
         dateLabelView = tk.Label(self, text = "Date")
-        weightLabelView = tk.Label(self, text = "Weight")
-        repsLabelView = tk.Label(self, text = "Reps")
+        weightLabelView = tk.Label(self, text = "Weight x Reps")
         dateLabelView.place(x=180, y=170)
         weightLabelView.place(x=260, y=170)
-        repsLabelView.place(x=320, y=170)
+
 
         #ScrolledText widget for results output (disabled text box), resultsBox returns view of results, viewBoxScroll is scrollbar
-        resultsBox = ScrolledText(viewBox, height=10, width=23)
+        resultsBox = ScrolledText(viewBox, height=10, width=25)
         resultsBox.pack(side="left")
         resultsBox.config(state=DISABLED)
 
@@ -567,7 +566,7 @@ class Log(tk.Frame):
             a = viewDeadlift()
             resultString = ""
             for i in range(len(a)):
-                resultString += str(a[i][0]) + "   " + str(a[i][1]) + "   " +str(a[i][2]) + "\n"
+                resultString += str(a[i][0]) + "   " + str(a[i][1]) + " x " +str(a[i][2]) + "\n"
             if len(resultString) >0:
                 return resultString
             else:
@@ -577,7 +576,7 @@ class Log(tk.Frame):
             a = viewSquat()
             resultString = ""
             for i in range(len(a)):
-                resultString += str(a[i][0]) + "   " + str(a[i][1]) + "   " +str(a[i][2]) + "\n"
+                resultString += str(a[i][0]) + "   " + str(a[i][1]) + " x " +str(a[i][2]) + "\n"
             if len(resultString) >0:
                 return resultString
             else:
@@ -587,7 +586,7 @@ class Log(tk.Frame):
             a = viewBench()
             resultString = ""
             for i in range(len(a)):
-                resultString += str(a[i][0]) + "   " + str(a[i][1]) + "   " +str(a[i][2]) + "\n"
+                resultString += str(a[i][0]) + "   " + str(a[i][1]) + " x " +str(a[i][2]) + "\n"
             if len(resultString) > 0:
                 return resultString
             else:
@@ -629,7 +628,7 @@ class Log(tk.Frame):
 class DatabaseTools(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Database Tools",relief="solid").place(x=150, y=30)
+        label = tk.Label(self, text="Database Tools",relief="solid", font=("Arial",12)).place(x=150, y=30)
 
         #buttons at top of page
         quit = tk.Button(self, text="Quit", command=lambda:windows.quit(self))
@@ -638,7 +637,7 @@ class DatabaseTools(tk.Frame):
         helpButton = tk.Button(self, text="Help", command=lambda:messagebox.showinfo("Help", "Enter your calculated or actual 1RM values into the boxes and click on your preferred training regime! \n\nInformation for each programme will be shown at the bottom."))
         helpButton.grid(row=0,column=2)
 
-        homeButton = tk.Button(self, text="Home", command = lambda:controller.show_frame(MainPage))
+        homeButton = tk.Button(self, text="Home", command=lambda:controller.show_frame(MainPage))
         homeButton.grid(row=0, column=1)
 
 
@@ -647,14 +646,14 @@ class DatabaseTools(tk.Frame):
         dateEntry = tk.Entry(self, width=10)
         weightEntry = tk.Entry(self, width=10)
         repEntry = tk.Entry(self, width=10)
-        dateEntry.place(x=180, y=200)
-        weightEntry.place(x=180, y=220)
-        repEntry.place(x=180, y=240)
+        dateEntry.place(x=180, y=190)
+        weightEntry.place(x=180, y=210)
+        repEntry.place(x=180, y=230)
 
         #labels for entry
-        dateLabel = tk.Label(self, width=6, relief=RIDGE, text="Date:").place(x=120, y=200)
-        weightLabel = tk.Label(self, width=6, relief=RIDGE, text="Weight:").place(x=120, y=220)
-        repLabel = tk.Label(self, width=6, relief=RIDGE, text="Reps:").place(x=120, y=240)
+        dateLabel = tk.Label(self, width=6, relief=RIDGE, text="Date:").place(x=120, y=190)
+        weightLabel = tk.Label(self, width=6, relief=RIDGE, text="Weight:").place(x=120, y=210)
+        repLabel = tk.Label(self, width=6, relief=RIDGE, text="Reps:").place(x=120, y=230)
 
         def validDate(date):
             reDate = '\d{4}-\d{2}-\d{2}'
@@ -719,10 +718,10 @@ class DatabaseTools(tk.Frame):
                 try:
                     if len(userdate) > 0 and len(weight) > 0 and len(reps) > 0:
                         if validDate(userdate):
-                            c.execute("INSERT INTO %sstats VALUES (%s,%s,%s)"%(lift,userdate,weight,reps))
+                            c.execute("INSERT INTO %sstats VALUES ('%s',%s,%s)"%(lift,userdate,weight,reps))
                             conn.commit()
                             conn.close()
-                            changeInfo.config(text = "%s x %s on %s added successfully to %s table."%(weight,reps,userdate, lift))
+                            changeInfo.config(text = "%s x %s on %s added successfully \n to %s table."%(weight,reps,userdate, lift))
                         else:
                             changeInfo.config(text = "Invalid date format, please insert date yyyy-mm-dd")
                     else:
@@ -738,33 +737,33 @@ class DatabaseTools(tk.Frame):
         resetSquat = tk.Button(self, text = "Clear Squat Data", width = 14, command = lambda: resetTable("squat"))
         resetBench = tk.Button(self, text = "Clear Bench Data", width = 14, command = lambda: resetTable("bench"))
         resetDeadlift = tk.Button(self, text = "Clear Deadlift Data", width = 14, command = lambda: resetTable("deadlift"))
-        resetSquat.place(x=10, y=100)
-        resetBench.place(x=10, y=130)
-        resetDeadlift.place(x=10, y=160)
+        resetSquat.place(x=10, y=80)
+        resetBench.place(x=10, y=110)
+        resetDeadlift.place(x=10, y=140)
 
         #buttons to delete specific info at certain dates
         deleteSquat = tk.Button(self, text = "Delete Squat", width = 14, command = lambda: deleteSpecific("squat"))
         deleteBench = tk.Button(self, text = "Delete Bench", width = 14, command = lambda: deleteSpecific("bench"))
         deleteDeadlift = tk.Button(self, text = "Delete Deadlift", width = 14, command = lambda: deleteSpecific("deadlift"))
-        deleteSquat.place(x=130, y=100)
-        deleteBench.place(x=130, y=130)
-        deleteDeadlift.place(x=130, y=160)
+        deleteSquat.place(x=130, y=80)
+        deleteBench.place(x=130, y=110)
+        deleteDeadlift.place(x=130, y=140)
 
         #buttons to add data at specific date
         addSquat = tk.Button(self, text = "Add Squat", width = 14, command = lambda: insertSpecific("squat"))
         addBench = tk.Button(self, text = "Add Bench", width = 14, command = lambda: insertSpecific("bench"))
         addDeadlift = tk.Button(self, text = "Add Deadlift", width = 14, command = lambda: insertSpecific("deadlift"))
-        addSquat.place(x=250, y=100)
-        addBench.place(x=250, y=130)
-        addDeadlift.place(x=250, y=160)
+        addSquat.place(x=250, y=80)
+        addBench.place(x=250, y=110)
+        addDeadlift.place(x=250, y=140)
 
         #label to confirm changes
         changeInfo = tk.Label(self, text ="", width = 40, height=3, relief=RIDGE)
-        changeInfo.place(x=50,y=280)
+        changeInfo.place(x=50,y=270)
 
         #back to log page
         backButton = tk.Button(self, text = "Back", width = 14, command = lambda:controller.show_frame(Log))
-        backButton.place(x=130,y=350)
+        backButton.place(x=135,y=340)
 
 
 

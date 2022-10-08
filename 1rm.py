@@ -1,11 +1,18 @@
 import re
 import sqlite3
 import tkinter as tk
-from tkinter import ACTIVE, DISABLED, END, NORMAL, RIDGE, Toplevel, messagebox
+from tkinter import ACTIVE, DISABLED, END, NORMAL, RIDGE, messagebox
 from tkinter.scrolledtext import ScrolledText
 from datetime import date
 
+"""
+Powerlifting helper app, allows for 1-rep calculations, programme generating and lift logging using tkinter python packages, implementing sqlite3 database. 
 
+Author: Andrew Nguyen
+
+"""
+
+#main class/controller
 class windows(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self,*args,**kwargs) #initiates the Tk window (in process becomes the controller)
@@ -36,6 +43,7 @@ class windows(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
 
+#homepage/mainpage, holds links to all of the other frames
 class MainPage(tk.Frame): #inherits from Frame
     def __init__(self, parent, controller): #initiates class, Frame is parent class, controller class is instance of the windows class.
         tk.Frame.__init__(self,parent) #initiates Frame class that this class inherits from
@@ -57,6 +65,9 @@ class MainPage(tk.Frame): #inherits from Frame
         quitButton = tk.Button(self, text="Quit", width=15, command=lambda:windows.quit(self))
         quitButton.place(x=120,y=320)
 
+        authorLabel = tk.Label(self, text="By Andrew Nguyen", font="verdana 5").place(x=310,y=365)
+
+#one rep maximum calculator frame
 class OneRMPage(tk.Frame):
     def __init__(self, parent, controller): 
         tk.Frame.__init__(self,parent)
@@ -93,7 +104,6 @@ class OneRMPage(tk.Frame):
         #submit button to initiate calculations
         submitButton = tk.Button(self, text="Get 1RM", command=lambda:printMaxes())
         submitButton.place(x=165, y=130)
-
 
         # ==============methods for calculating 1rm Lombardi, brzycki, mcglothin and epley. Average calculated out for other uses ===============
         #calculations
@@ -158,8 +168,7 @@ class OneRMPage(tk.Frame):
         showPercentageButton = tk.Button(self, text = "Show Percentages", command=lambda:showPercentages(), state=DISABLED)
         showPercentageButton.place(x=140, y=335)
 
-
-
+#programmes frame, for generating weekly programmes
 class ProgrammesPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
@@ -228,10 +237,6 @@ class ProgrammesPage(tk.Frame):
             except:
                 messagebox.showerror("Deadlift Error", "Please insert a numeric value (up to 1 d.p) for 1RM Deadlift.")
 
-
-
-
-
         #======================================= beginner programme methods linear +5% each session ====================================================
 
         #methods to calculate out weights and return an array to be iterated over
@@ -262,8 +267,6 @@ class ProgrammesPage(tk.Frame):
             populateLinearProgrammeSquat()
             populateLinearProgrammeDeadlift()
             tk.Label(self, text = "Add 5kg to your 1RM and repeat for 1 cycle if you succeed. \n If you fail, deload by 5kg and repeat until you can do 2 cycles.", relief="ridge", width = 49).place(x=15,y=330)
-
-
 
         #============================================ intermediate periodised progressive programme SBD calculations 5x5 BSD 60%, 70%, 80% +5 on each week ==============
         def progProgrammeNumbersBench(bench):
@@ -332,7 +335,7 @@ class ProgrammesPage(tk.Frame):
         intProgButton = tk.Button(self, text="Intermediate 5x5 Weekly Progression", width=30, command=lambda:populateProgProgram()).place(x=150, y=90)
         advProgButton = tk.Button(self, text="Intermediate Powerbuilding Split", width=30, command=lambda:populatePowerProgram()).place(x=150, y=120)
 
-
+#help frame, details on how to use each of the other frames
 class HelpPage(tk.Frame):
     def __init__(self,parent,controller):
         tk.Frame.__init__(self,parent)
@@ -342,15 +345,25 @@ class HelpPage(tk.Frame):
         quit = tk.Button(self, text="Quit", command=lambda:windows.quit(self))
         quit.grid(row=0, column=3)
 
-        helpButton = tk.Button(self, text="Help", command=lambda:messagebox.showinfo("Help"))
+        helpButton = tk.Button(self, text="Help", command=lambda:messagebox.showinfo("Help", "You're already on the help page!"))
         helpButton.grid(row=0,column=2)
 
         backButton = tk.Button(self, text="Home", command = lambda:controller.show_frame(MainPage))
         backButton.grid(row=0, column=1)
 
-        
+        repMaxLabel = tk.Label(self, text="One Rep Max Calculator", font=("Arial",10), relief="ridge").place(x=10,y=60)
+        programmesLabel = tk.Label(self, text="Programmes", font=("Arial",10), relief="ridge").place(x=10,y=150)
+        liftLogLabel = tk.Label(self, text="Lift Log", font=("Arial",10), relief="ridge").place(x=10,y=225)
 
-#lets you log gym stats - bench, deadlift, squat stats (weights, dates, reps) - maybe a view progress/statisics page
+        repHelpInfo = "Input the weight and successful reps into the corresponding boxes \nand calculate your estimated one repetition max. \nAfter this, you can press 'Show Percentages' to show estimated rep \nranges"
+        programmeHelpInfo = "Input your one-rep maxes into the corresponding boxes and \nclick on your preferred programmes to generate a weekly lifting \nprogramme."
+        liftLogInfo = "Log your lifts! Input your stats for the day into the box and press the \n'Submit x' button. Click on the 'View x' buttons to check your log. \nYou can use the 'Database Tools' button to insert specific dates, clear \ndatabase and delete data from specific dates. \nTo insert/delete data, insert values into the relevant boxes \n(date format yyyy-mm-dd) and 'Add x' or 'Delete x'. \nTo clear data click on the 'Clear x' buttons, THIS CANNOT BE \nUNDONE."
+
+        repHelpInfoLabel = tk.Label(self, text=repHelpInfo, anchor='e', justify="left").place(x=10, y=85)
+        programmesHelpInfoLabel = tk.Label(self, text=programmeHelpInfo, justify="left").place(x=10, y=175)
+        liftLogInfoLabel = tk.Label(self, text=liftLogInfo, anchor='e', justify="left").place(x=10, y=250)   
+
+#lets you log gym stats - bench, deadlift, squat stats (weights, dates, reps) 
 class Log(tk.Frame): 
     def __init__(self,parent,controller):
         tk.Frame.__init__(self,parent)
@@ -434,13 +447,10 @@ class Log(tk.Frame):
             else:
                 messagebox.showinfo("Error", "Missing parameter, check weight or number of reps is input correctly.")
 
-
-
-        #create database and returns cursor to execute further queries
+        #create database if doesn't exist/connects to db
         def connectDB():
             return sqlite3.connect("lifts.db")
 
-        
         def getWeight(lift):
             if lift == "bench":
                 weight = int(float(benchWeightEntry.get()))
@@ -542,14 +552,11 @@ class Log(tk.Frame):
             except:
                 return ""            
 
-
-
         #frame to hold return info
         viewBox = tk.Frame(self, bd=1, relief="ridge", height=170, width=200)
         viewBox.place(x=150,y=195)
 
         #datalabels for results view
-
         dateLabelView = tk.Label(self, text = "Date")
         weightLabelView = tk.Label(self, text = "Weight x Reps")
         dateLabelView.place(x=180, y=170)
@@ -622,9 +629,7 @@ class Log(tk.Frame):
         databaseToolsButton = tk.Button(self, text = "Database Tools", width=12, command = lambda:controller.show_frame(DatabaseTools))
         databaseToolsButton.place(x=30, y=330)
 
-
-
-
+#advanced database user tools such as drop table, add specific dates, delete specific dates
 class DatabaseTools(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -639,8 +644,6 @@ class DatabaseTools(tk.Frame):
 
         homeButton = tk.Button(self, text="Home", command=lambda:controller.show_frame(MainPage))
         homeButton.grid(row=0, column=1)
-
-
 
         #entry for date/weight/rate
         dateEntry = tk.Entry(self, width=10)
@@ -663,8 +666,6 @@ class DatabaseTools(tk.Frame):
             else:
                 return False
 
-
-
         def connectDB(): 
             return sqlite3.connect("lifts.db")
 
@@ -681,8 +682,6 @@ class DatabaseTools(tk.Frame):
                     changeInfo.config(text="%s table does not exist.\n Please enter an entry through Log." %(lift).capitalize())
             except:
                 changeInfo.config(text="Database error/does not exist. \n Please input an entry through Log to create database.")
-
-
 
         #delete specific lift's data at time specified in the entry box (dateEntry on db page)
         def deleteSpecific(lift):
@@ -731,8 +730,6 @@ class DatabaseTools(tk.Frame):
             except:
                 changeInfo.config(text="Database error/does not exist. \n Please input an entry through Log to create database.")
 
-        
-
         #buttons to clear databases 
         resetSquat = tk.Button(self, text = "Clear Squat Data", width = 14, command = lambda: resetTable("squat"))
         resetBench = tk.Button(self, text = "Clear Bench Data", width = 14, command = lambda: resetTable("bench"))
@@ -765,36 +762,7 @@ class DatabaseTools(tk.Frame):
         backButton = tk.Button(self, text = "Back", width = 14, command = lambda:controller.show_frame(Log))
         backButton.place(x=135,y=340)
 
-
-
-
-
-
-
-
-            
-
-
-
-        #TODO: 
-        #database tools form (delete or change entries, or add specific dates; new form with additional tools/widgets
-        #sort date out date issue on line 713, date conversion using split()? 
-
-
-
-            
-
-
-
-
-
-
-
-
-
-        
-
-
+ 
 if __name__ == "__main__":
-    test = windows()
-    test.mainloop()
+    app = windows()
+    app.mainloop()
